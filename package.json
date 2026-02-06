@@ -1,0 +1,32 @@
+{
+  "name": "demo-registry-widget",
+  "version": "1.0.0",
+  "description": "just client for registry",
+  "homepage": "https://github.com/P1oN/demo-registry-widget#readme",
+  "bugs": {
+    "url": "https://github.com/P1oN/demo-registry-widget/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/P1oN/demo-registry-widget.git"
+  },
+  "license": "ISC",
+  "author": "",
+  "type": "module",
+  "files": [
+    "dist"
+  ],
+  "exports": {
+    ".": "./dist/full.min.js",
+    "./full": "./dist/full.min.js",
+    "./micro": "./dist/micro.min.js"
+  },
+  "scripts": {
+    "build": "tsup",
+    "prepublishOnly": "npm run build"
+  },
+  "devDependencies": {
+    "tsup": "^8.0.0",
+    "typescript": "^5.0.0"
+  }
+}
