@@ -1,7 +1,7 @@
 {
   "name": "demo-registry-widget",
   "version": "1.0.0",
-  "description": "just client for registry",
+  "description": "Ultra-light demo registry widget (TSV-based, no JSON)",
   "homepage": "https://github.com/P1oN/demo-registry-widget#readme",
   "bugs": {
     "url": "https://github.com/P1oN/demo-registry-widget/issues"
@@ -10,9 +10,9 @@
     "type": "git",
     "url": "git+https://github.com/P1oN/demo-registry-widget.git"
   },
-  "license": "ISC",
-  "author": "",
+  "author": "P1oN",
   "type": "module",
+  "main": "./dist/full.min.js",
   "files": [
     "dist"
   ],
@@ -28,5 +28,14 @@
   "devDependencies": {
     "tsup": "^8.0.0",
     "typescript": "^5.0.0"
-  }
+  },
+  "license": "MIT",
+  "keywords": [
+    "demo",
+    "registry",
+    "widget",
+    "performance",
+    "tsv",
+    "frontend"
+  ]
 }

@@ -8,6 +8,7 @@ export default defineConfig([
     sourcemap: false,
     outDir: "dist",
     clean: true,
+    outExtension: () => ({ js: ".min.js" }),
   },
   {
     entry: ["src/micro.ts"],
@@ -16,5 +17,6 @@ export default defineConfig([
     sourcemap: false,
     outDir: "dist",
     clean: false,
+    outExtension: () => ({ js: ".min.js" }),
   },
 ]);
