@@ -2,6 +2,8 @@ import {
   escapeHtml,
   idle,
   loadRegistryTSV,
+  parseRegistryTSV,
+  sanitizeHttpUrl,
   type CoreOptions,
   type DemoItem,
 } from "./core";
@@ -14,9 +16,20 @@ export type FullWidgetOptions = CoreOptions & {
   sort?: "slug" | "title" | "none"; // default: "none"
 };
 
-const BUTTON_ID = "demosBtn";
-const POPOVER_ID = "demosPopover";
-const CONTENT_ID = "demosContent";
+export { parseRegistryTSV, sanitizeHttpUrl };
+
+const BUTTON_ID = __DRW_BUTTON_ID__;
+const POPOVER_ID = __DRW_POPOVER_ID__;
+const CONTENT_ID = __DRW_CONTENT_ID__;
+const DEFAULT_LIMIT = __DRW_LIMIT__;
+
+function resolveSort(sort: FullWidgetOptions["sort"] | undefined): "slug" | "title" | "none" {
+  if (sort === "slug" || sort === "title" || sort === "none") return sort;
+  if (__DRW_SORT__ === "slug" || __DRW_SORT__ === "title" || __DRW_SORT__ === "none") {
+    return __DRW_SORT__;
+  }
+  return "none";
+}
 
 function byTitle(a: DemoItem, b: DemoItem) {
   return a.title.localeCompare(b.title);
@@ -25,15 +38,44 @@ function bySlug(a: DemoItem, b: DemoItem) {
   return a.slug.localeCompare(b.slug);
 }
 
+export function renderFullListHtml(items: DemoItem[]): string {
+  const html =
+    '<ul class="list">' +
+    items
+      .map((it) => {
+        const safeUrl = sanitizeHttpUrl(it.url);
+        if (!safeUrl) return "";
+        const tags = it.tags.length
+          ? `<div class="tags">${escapeHtml(it.tags.join(", "))}</div>`
+          : "";
+        return (
+          `<li class="item">` +
+          `<div class="row">` +
+          `<a href="${safeUrl}" rel="noopener noreferrer">${escapeHtml(it.title || it.slug)}</a>` +
+          `<span class="muted">${escapeHtml(it.slug)}</span>` +
+          `</div>` +
+          tags +
+          `</li>`
+        );
+      })
+      .join("") +
+    "</ul>";
+
+  return html;
+}
+
 export default function initFull(opts: FullWidgetOptions): void {
   const buttonId = opts.buttonId || BUTTON_ID;
   const popoverId = opts.popoverId || POPOVER_ID;
   const contentId = opts.contentId || CONTENT_ID;
 
-  const btn = document.getElementById(buttonId) as HTMLButtonElement | null;
-  const pop = document.getElementById(popoverId) as HTMLElement | null;
-  const content = document.getElementById(contentId) as HTMLElement | null;
-  if (!btn || !pop || !content) return;
+  const btnNode = document.getElementById(buttonId) as HTMLButtonElement | null;
+  const popNode = document.getElementById(popoverId) as HTMLElement | null;
+  const contentNode = document.getElementById(contentId) as HTMLElement | null;
+  if (!btnNode || !popNode || !contentNode) return;
+  const btn = btnNode;
+  const pop = popNode;
+  const content = contentNode;
 
   let loaded = false;
   let loading: Promise<void> | null = null;
@@ -41,36 +83,23 @@ export default function initFull(opts: FullWidgetOptions): void {
   function render(items: DemoItem[]) {
     let list = items.slice();
 
-    if (opts.sort === "title") list.sort(byTitle);
-    else if (opts.sort === "slug") list.sort(bySlug);
+    const sort = resolveSort(opts.sort);
+    if (sort === "title") list.sort(byTitle);
+    else if (sort === "slug") list.sort(bySlug);
 
-    if (typeof opts.limit === "number" && opts.limit > 0)
-      list = list.slice(0, opts.limit);
+    const limit = typeof opts.limit === "number" ? opts.limit : DEFAULT_LIMIT;
+    if (limit > 0) list = list.slice(0, limit);
 
     if (!list.length) {
       content.innerHTML = '<div class="error">No demos found.</div>';
       return;
     }
 
-    const html =
-      '<ul class="list">' +
-      list
-        .map((it) => {
-          const tags = it.tags.length
-            ? `<div class="tags">${escapeHtml(it.tags.join(", "))}</div>`
-            : "";
-          return (
-            `<li class="item">` +
-            `<div class="row">` +
-            `<a href="${it.url}" rel="noopener noreferrer">${escapeHtml(it.title || it.slug)}</a>` +
-            `<span class="muted">${escapeHtml(it.slug)}</span>` +
-            `</div>` +
-            tags +
-            `</li>`
-          );
-        })
-        .join("") +
-      "</ul>";
+    const html = renderFullListHtml(list);
+    if (!html || html === '<ul class="list"></ul>') {
+      content.innerHTML = '<div class="error">No demos found.</div>';
+      return;
+    }
 
     content.innerHTML = html;
   }

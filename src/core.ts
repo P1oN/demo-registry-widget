@@ -12,18 +12,18 @@ export type CoreOptions = {
   registryPath?: string; // DEFAULT_REGISTRY_PATH
 };
 
-type ParsedRegistry = { version: string; items: DemoItem[] };
+export type ParsedRegistry = { version: string; items: DemoItem[] };
 
-const DEFAULT_MAX_AGE = 7 * 24 * 60 * 60 * 1000;
+const DEFAULT_MAX_AGE = __DRW_MAX_AGE_MS__;
 
-const DEFAULT_CACHE_KEY_PREFIX = "demo-registry";
-const DEFAULT_REGISTRY_PATH = "/registry.tsv";
+const DEFAULT_CACHE_KEY_PREFIX = __DRW_CACHE_KEY_PREFIX__;
+const DEFAULT_REGISTRY_PATH = __DRW_REGISTRY_PATH__;
 
 function normalizeBaseUrl(u: string): string {
   return u.replace(/\/+$/, "");
 }
 
-function parseRegistryTSV(text: string): ParsedRegistry {
+export function parseRegistryTSV(text: string): ParsedRegistry {
   const t = text.replace(/\r\n/g, "\n").replace(/\r/g, "\n");
   const m = t.match(/^#v=([^\n]+)/m);
   const version = (m?.[1] || "").trim();
@@ -45,15 +45,16 @@ function parseRegistryTSV(text: string): ParsedRegistry {
     header[0] === "slug" && header[1] === "title" && header[2] === "url";
 
   const items: DemoItem[] = [];
-  for (i = i + 1; i < lines.length; i++) {
+  const startAt = hasHeader ? i + 1 : i;
+  for (i = startAt; i < lines.length; i++) {
     const line = lines[i];
     if (!line || !line.trim() || line[0] === "#") continue;
 
     const cols = line.split("\t");
     const slug = (cols[0] || "").trim();
-    const title = (hasHeader ? cols[1] || slug : cols[1] || slug).trim();
-    const url = (hasHeader ? cols[2] || "" : cols[2] || "").trim();
-    const tagsRaw = (hasHeader ? cols[3] || "" : cols[3] || "").trim();
+    const title = (cols[1] || slug).trim();
+    const url = (cols[2] || "").trim();
+    const tagsRaw = (cols[3] || "").trim();
 
     if (!slug || !url) continue;
 
@@ -128,6 +129,18 @@ export function escapeHtml(s: string): string {
     .replaceAll(">", "&gt;")
     .replaceAll('"', "&quot;")
     .replaceAll("'", "&#039;");
+}
+
+export function sanitizeHttpUrl(url: string): string | null {
+  try {
+    const parsed = new URL(String(url).trim());
+    if (parsed.protocol !== "http:" && parsed.protocol !== "https:") {
+      return null;
+    }
+    return parsed.href;
+  } catch {
+    return null;
+  }
 }
 
 export function idle(fn: () => void): void {

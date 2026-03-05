@@ -13,16 +13,31 @@
   "author": "P1oN",
   "type": "module",
   "main": "./dist/full.min.js",
+  "types": "./dist/full.d.ts",
   "files": [
     "dist"
   ],
   "exports": {
-    ".": "./dist/full.min.js",
-    "./full": "./dist/full.min.js",
-    "./micro": "./dist/micro.min.js"
+    ".": {
+      "types": "./dist/full.d.ts",
+      "import": "./dist/full.min.js"
+    },
+    "./full": {
+      "types": "./dist/full.d.ts",
+      "import": "./dist/full.min.js"
+    },
+    "./micro": {
+      "types": "./dist/micro.d.ts",
+      "import": "./dist/micro.min.js"
+    }
   },
   "scripts": {
     "build": "tsup",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test:unit": "node --test test/unit.test.mjs",
+    "test:types": "tsc --noEmit -p test/tsconfig.json",
+    "test:pack": "node test/pack-smoke.mjs",
+    "test": "npm run build && npm run test:unit && npm run test:types && npm run test:pack",
     "prepublishOnly": "npm run build"
   },
   "devDependencies": {

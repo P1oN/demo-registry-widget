@@ -1,4 +1,11 @@
-import { idle, loadRegistryTSV, type CoreOptions, type DemoItem } from "./core";
+import {
+  escapeHtml,
+  idle,
+  loadRegistryTSV,
+  sanitizeHttpUrl,
+  type CoreOptions,
+  type DemoItem,
+} from "./core";
 
 export type MicroWidgetOptions = CoreOptions & {
   buttonId?: string; // BUTTON_ID
@@ -7,36 +14,48 @@ export type MicroWidgetOptions = CoreOptions & {
   limit?: number; // default: 8
 };
 
-const BUTTON_ID = "demosBtn";
-const POPOVER_ID = "demosPopover";
-const CONTENT_ID = "demosContent";
+const BUTTON_ID = __DRW_BUTTON_ID__;
+const POPOVER_ID = __DRW_POPOVER_ID__;
+const CONTENT_ID = __DRW_CONTENT_ID__;
+const DEFAULT_LIMIT = __DRW_LIMIT__;
+
+export function renderMicroLinksHtml(items: DemoItem[], limit: number): string {
+  const list = items.slice(0, Math.max(0, limit));
+  if (!list.length) return "";
+
+  let html = "";
+  for (let i = 0; i < list.length; i++) {
+    const it = list[i];
+    const safeUrl = sanitizeHttpUrl(it.url);
+    if (!safeUrl) continue;
+    const safeLabel = escapeHtml(it.title || it.slug);
+    html += `<div><a href="${safeUrl}" rel="noopener noreferrer">${safeLabel}</a></div>`;
+  }
+  return html;
+}
 
 export default function initMicro(opts: MicroWidgetOptions): void {
   const buttonId = opts.buttonId || BUTTON_ID;
   const popoverId = opts.popoverId || POPOVER_ID;
   const contentId = opts.contentId || CONTENT_ID;
-  const limit = typeof opts.limit === "number" ? opts.limit : 8;
+  const limit = typeof opts.limit === "number" ? opts.limit : DEFAULT_LIMIT;
 
-  const btn = document.getElementById(buttonId) as HTMLButtonElement | null;
-  const pop = document.getElementById(popoverId) as HTMLElement | null;
-  const content = document.getElementById(contentId) as HTMLElement | null;
-  if (!btn || !pop || !content) return;
+  const btnNode = document.getElementById(buttonId) as HTMLButtonElement | null;
+  const popNode = document.getElementById(popoverId) as HTMLElement | null;
+  const contentNode = document.getElementById(contentId) as HTMLElement | null;
+  if (!btnNode || !popNode || !contentNode) return;
+  const btn = btnNode;
+  const pop = popNode;
+  const content = contentNode;
 
   let loaded = false;
   let loading: Promise<void> | null = null;
 
   function render(items: DemoItem[]) {
-    const list = items.slice(0, Math.max(0, limit));
-    if (!list.length) {
+    const html = renderMicroLinksHtml(items, limit);
+    if (!html) {
       content.textContent = "No demos.";
       return;
-    }
-
-    // ultra-light markup: just links
-    let html = "";
-    for (let i = 0; i < list.length; i++) {
-      const it = list[i];
-      html += `<div><a href="${it.url}" rel="noopener noreferrer">${it.title || it.slug}</a></div>`;
     }
     content.innerHTML = html;
   }
