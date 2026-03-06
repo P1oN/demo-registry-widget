@@ -1,6 +1,6 @@
 {
   "name": "demo-registry-widget",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Ultra-light demo registry widget (TSV-based, no JSON)",
   "homepage": "https://github.com/P1oN/demo-registry-widget#readme",
   "bugs": {
