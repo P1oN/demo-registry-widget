@@ -5,7 +5,7 @@ type DemoItem = {
     tags: string[];
 };
 type CoreOptions = {
-    baseUrl: string;
+    baseUrl?: string;
     cacheKeyPrefix?: string;
     maxAgeMs?: number;
     registryPath?: string;
@@ -26,6 +26,6 @@ type FullWidgetOptions = CoreOptions & {
 };
 
 declare function renderFullListHtml(items: DemoItem[]): string;
-declare function initFull(opts: FullWidgetOptions): void;
+declare function initFull(opts?: FullWidgetOptions): void;
 
 export { type FullWidgetOptions, initFull as default, parseRegistryTSV, renderFullListHtml, sanitizeHttpUrl };

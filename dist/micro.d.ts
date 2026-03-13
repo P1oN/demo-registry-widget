@@ -5,7 +5,7 @@ type DemoItem = {
     tags: string[];
 };
 type CoreOptions = {
-    baseUrl: string;
+    baseUrl?: string;
     cacheKeyPrefix?: string;
     maxAgeMs?: number;
     registryPath?: string;
@@ -18,6 +18,6 @@ type MicroWidgetOptions = CoreOptions & {
     limit?: number;
 };
 declare function renderMicroLinksHtml(items: DemoItem[], limit: number): string;
-declare function initMicro(opts: MicroWidgetOptions): void;
+declare function initMicro(opts?: MicroWidgetOptions): void;
 
 export { type MicroWidgetOptions, initMicro as default, renderMicroLinksHtml };

@@ -1,0 +1,248 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>demo-registry-widget docs</title>
+        <style>
+            :root {
+                --accent-color: #1d4ed8;
+                color-scheme: light;
+                font-family:
+                    ui-sans-serif,
+                    system-ui,
+                    -apple-system,
+                    "Segoe UI",
+                    sans-serif;
+            }
+            body {
+                margin: 0;
+                background: #f8fafc;
+                color: #111827;
+            }
+            header {
+                display: flex;
+                justify-content: center;
+                background: #fff;
+                border-bottom: 1px solid #e5e7eb;
+                nav {
+                    display: flex;
+                    justify-content: space-between;
+                    width: min(100%, 1440px);
+                    padding: 0.5rem;
+                    a {
+                        padding: 1rem;
+                        text-decoration: none;
+                    }
+                }
+            }
+            main {
+                max-width: 960px;
+                margin: 0 auto;
+                padding: 32px 20px 56px;
+            }
+            .note {
+                background: #dbeafe;
+                border: 1px solid #93c5fd;
+                border-radius: 10px;
+                padding: 12px;
+                margin-bottom: 20px;
+            }
+            article {
+                background: #fff;
+                border: 1px solid #e5e7eb;
+                border-radius: 12px;
+                padding: 24px;
+            }
+            h1,
+            h2,
+            h3 {
+                line-height: 1.25;
+            }
+            p,
+            li {
+                line-height: 1.6;
+            }
+            pre {
+                background: #0f172a;
+                color: #e2e8f0;
+                border-radius: 8px;
+                padding: 12px;
+                overflow-x: auto;
+            }
+            code {
+                background: #f1f5f9;
+                border-radius: 4px;
+                padding: 2px 4px;
+            }
+            pre code {
+                background: transparent;
+                padding: 0;
+            }
+            a {
+                color: var(--accent-color);
+
+                &:visited {
+                    color: var(--accent-color);
+                }
+            }
+            .fallback {
+                border: 1px solid #e5e7eb;
+                border-radius: 10px;
+                padding: 12px;
+                background: #fff;
+            }
+            .hidden {
+                display: none;
+            }
+        </style>
+    </head>
+    <body>
+        <header>
+            <nav>
+                <a href="/playground" title="Widget demo">Playground</a>
+            </nav>
+        </header>
+        <main>
+            <div class="note">
+                This page attempts to render the latest
+                <code>README.md</code> from the repository main branch.
+            </div>
+            <article id="content">Loading README...</article>
+        </main>
+
+        <script>
+            const contentEl = document.getElementById("content");
+            const readmeUrl =
+                "https://raw.githubusercontent.com/P1oN/demo-registry-widget/main/README.md";
+
+            const noteEl = document.querySelector(".note");
+
+            function escapeHtml(input) {
+                return String(input)
+                    .replaceAll("&", "&amp;")
+                    .replaceAll("<", "&lt;")
+                    .replaceAll(">", "&gt;")
+                    .replaceAll('"', "&quot;")
+                    .replaceAll("'", "&#039;");
+            }
+
+            function parseInline(text) {
+                let out = escapeHtml(text);
+                out = out.replace(/`([^`]+)`/g, "<code>$1</code>");
+                out = out.replace(
+                    /\[([^\]]+)\]\(([^)]+)\)/g,
+                    '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>',
+                );
+                return out;
+            }
+
+            function markdownToHtml(md) {
+                const lines = md.replace(/\r/g, "").split("\n");
+                const html = [];
+                let inCode = false;
+                let inList = false;
+
+                for (const line of lines) {
+                    if (line.startsWith("```")) {
+                        if (!inCode) {
+                            if (inList) {
+                                html.push("</ul>");
+                                inList = false;
+                            }
+                            inCode = true;
+                            html.push("<pre><code>");
+                        } else {
+                            inCode = false;
+                            html.push("</code></pre>");
+                        }
+                        continue;
+                    }
+
+                    if (inCode) {
+                        html.push(`${escapeHtml(line)}\n`);
+                        continue;
+                    }
+
+                    if (!line.trim()) {
+                        if (inList) {
+                            html.push("</ul>");
+                            inList = false;
+                        }
+                        continue;
+                    }
+
+                    const header = line.match(/^(#{1,3})\s+(.+)/);
+                    if (header) {
+                        if (inList) {
+                            html.push("</ul>");
+                            inList = false;
+                        }
+                        const level = header[1].length;
+                        html.push(
+                            `<h${level}>${parseInline(header[2])}</h${level}>`,
+                        );
+                        continue;
+                    }
+
+                    if (line.startsWith("- ")) {
+                        if (!inList) {
+                            html.push("<ul>");
+                            inList = true;
+                        }
+                        html.push(`<li>${parseInline(line.slice(2))}</li>`);
+                        continue;
+                    }
+
+                    if (inList) {
+                        html.push("</ul>");
+                        inList = false;
+                    }
+
+                    html.push(`<p>${parseInline(line)}</p>`);
+                }
+
+                if (inList) html.push("</ul>");
+                if (inCode) html.push("</code></pre>");
+
+                return html.join("\n");
+            }
+
+            function renderFallback() {
+                contentEl.innerHTML = `
+          <h1>demo-registry-widget</h1>
+          <div class="fallback">
+            <p>Could not load README from GitHub right now.</p>
+            <p>Quick start:</p>
+            <pre><code>npm i demo-registry-widget</code></pre>
+            <pre><code>import initWidget from "demo-registry-widget";
+
+initWidget({ baseUrl: "https://example.com" });</code></pre>
+            <p>Required DOM:</p>
+            <pre><code>&lt;button id="demosBtn" aria-expanded="false"&gt;Demos&lt;/button&gt;
+&lt;div id="demosPopover"&gt;
+  &lt;div id="demosContent"&gt;&lt;/div&gt;
+&lt;/div&gt;</code></pre>
+            <p>Repository: <a href="https://github.com/P1oN/demo-registry-widget" target="_blank" rel="noopener noreferrer">github.com/P1oN/demo-registry-widget</a></p>
+          </div>
+        `;
+            }
+
+            fetch(readmeUrl, { cache: "no-store" })
+                .then((res) => {
+                    if (!res.ok)
+                        throw new Error(`Failed to load README: ${res.status}`);
+                    return res.text();
+                })
+                .then((text) => {
+                    contentEl.innerHTML = markdownToHtml(text);
+                })
+                .catch(() => {
+                    renderFallback();
+                })
+                .finally(() => {
+                    noteEl.classList.add("hidden");
+                });
+        </script>
+    </body>
+</html>

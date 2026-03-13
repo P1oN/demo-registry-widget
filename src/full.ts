@@ -22,6 +22,7 @@ const BUTTON_ID = __DRW_BUTTON_ID__;
 const POPOVER_ID = __DRW_POPOVER_ID__;
 const CONTENT_ID = __DRW_CONTENT_ID__;
 const DEFAULT_LIMIT = __DRW_LIMIT__;
+const BASE_URL_REQUIRED_MESSAGE = "Configure baseUrl to load demos.";
 
 function resolveSort(sort: FullWidgetOptions["sort"] | undefined): "slug" | "title" | "none" {
   if (sort === "slug" || sort === "title" || sort === "none") return sort;
@@ -64,7 +65,7 @@ export function renderFullListHtml(items: DemoItem[]): string {
   return html;
 }
 
-export default function initFull(opts: FullWidgetOptions): void {
+export default function initFull(opts: FullWidgetOptions = {}): void {
   const buttonId = opts.buttonId || BUTTON_ID;
   const popoverId = opts.popoverId || POPOVER_ID;
   const contentId = opts.contentId || CONTENT_ID;
@@ -107,6 +108,10 @@ export default function initFull(opts: FullWidgetOptions): void {
   async function ensureLoaded() {
     if (loaded) return;
     if (loading) return loading;
+    if (!opts.baseUrl) {
+      content.innerHTML = `<div class="error">${BASE_URL_REQUIRED_MESSAGE}</div>`;
+      return;
+    }
 
     loading = (async () => {
       content.textContent = "Loading…";

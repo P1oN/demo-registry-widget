@@ -1,0 +1,6 @@
+#v=1
+slug	title	url	tags
+alpha	Alpha Demo	https://example.com/alpha	perf,ui
+beta	Beta Demo	https://example.com/beta	tsv,data
+gamma	Gamma Demo	https://example.com/gamma	micro,fast
+unsafe	Unsafe URL	javascript:alert(1)	security

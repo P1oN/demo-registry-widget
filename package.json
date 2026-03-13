@@ -33,11 +33,17 @@
   },
   "scripts": {
     "build": "tsup",
+    "build:watch": "tsup --watch",
+    "playground": "node scripts/serve-static.mjs",
+    "dev": "node scripts/dev.mjs",
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "test:unit": "node --test test/unit.test.mjs",
+    "test:watch": "node --test --watch test/unit.test.mjs",
     "test:types": "tsc --noEmit -p test/tsconfig.json",
     "test:pack": "node test/pack-smoke.mjs",
-    "test": "npm run build && npm run test:unit && npm run test:types && npm run test:pack",
+    "test:fast": "npm run build && npm run test:unit && npm run test:types",
+    "test:ci": "npm run build && npm run test:unit && npm run test:types && npm run test:pack",
+    "test": "npm run test:fast",
     "prepublishOnly": "npm run build"
   },
   "devDependencies": {

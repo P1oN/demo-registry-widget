@@ -6,7 +6,7 @@ export type DemoItem = {
 };
 
 export type CoreOptions = {
-  baseUrl: string;
+  baseUrl?: string;
   cacheKeyPrefix?: string; // DEFAULT_CACHE_KEY_PREFIX
   maxAgeMs?: number; // DEFAULT_MAX_AGE: 7 days
   registryPath?: string; // DEFAULT_REGISTRY_PATH

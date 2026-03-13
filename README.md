@@ -63,6 +63,9 @@ initMicro({
 });
 ```
 
+Both `initFull()` and `initMicro()` can be called without arguments.
+In that case, the widget initializes safely and shows a configuration hint until `baseUrl` is provided.
+
 ## HTML requirements
 
 Both widget variants expect these elements to exist in the page:
@@ -114,9 +117,16 @@ Optional version line is supported:
 
 ```bash
 npm run build
+npm run build:watch
+npm run playground
+npm run dev
 npm run typecheck
-npm test
+npm run test:fast
+npm run test:ci
+npm run test:watch
 ```
+
+`playground/` is a lightweight visual test bed for full/micro modes, sorting, limits, and load error scenarios.
 
 ## CI
 

@@ -1,0 +1,294 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>demo-registry-widget playground</title>
+        <style>
+            :root {
+                --accent-color: #1d4ed8;
+                color-scheme: light;
+                font-family:
+                    ui-sans-serif,
+                    system-ui,
+                    -apple-system,
+                    "Segoe UI",
+                    sans-serif;
+            }
+            body {
+                margin: 0;
+                background: #f8fafc;
+                color: #111827;
+            }
+            header {
+                display: flex;
+                justify-content: center;
+                background: #fff;
+                border-bottom: 1px solid #e5e7eb;
+                nav {
+                    display: flex;
+                    justify-content: space-between;
+                    width: min(100%, 1440px);
+                    padding: 0.5rem;
+                    a {
+                        padding: 1rem;
+                        text-decoration: none;
+                    }
+                }
+            }
+            main {
+                max-width: 960px;
+                margin: 0 auto;
+                padding: 32px 20px 56px;
+            }
+            h1 {
+                margin-top: 0;
+            }
+            a {
+                color: var(--accent-color);
+
+                &:visited {
+                    color: var(--accent-color);
+                }
+            }
+            .controls {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+                gap: 12px;
+                margin-bottom: 18px;
+            }
+            .control {
+                background: #ffffff;
+                border: 1px solid #e5e7eb;
+                border-radius: 10px;
+                padding: 10px;
+                height: fit-content;
+            }
+            .control label {
+                display: block;
+                font-size: 12px;
+                color: #4b5563;
+                margin-bottom: 6px;
+            }
+            .control input,
+            .control select {
+                width: 100%;
+                box-sizing: border-box;
+                padding: 7px;
+
+                & + input {
+                    display: none;
+                    margin-block-start: 1rem;
+                }
+            }
+            .control select:has(option[value="custom"]:checked) + input {
+                display: block;
+            }
+            .panel {
+                background: #fff;
+                border: 1px solid #e5e7eb;
+                border-radius: 12px;
+                padding: 16px;
+            }
+            .toolbar {
+                display: flex;
+                gap: 8px;
+                margin-bottom: 12px;
+            }
+            button {
+                background: var(--accent-color);
+                color: #fff;
+                border: 0;
+                border-radius: 8px;
+                padding: 8px 12px;
+                cursor: pointer;
+            }
+            button.secondary {
+                background: #6b7280;
+            }
+            #demosPopover {
+                border: 1px solid #d1d5db;
+                border-radius: 8px;
+                padding: 12px;
+                margin-top: 10px;
+                display: none;
+            }
+            #demosPopover[data-open="1"] {
+                display: block;
+            }
+            .error {
+                color: #b91c1c;
+            }
+            .list {
+                margin: 0;
+                padding-left: 20px;
+            }
+            .item + .item {
+                margin-top: 8px;
+            }
+            .row {
+                display: flex;
+                justify-content: space-between;
+                gap: 10px;
+            }
+            .muted {
+                color: #6b7280;
+            }
+            .tags {
+                color: #4b5563;
+                font-size: 12px;
+            }
+            .meta {
+                margin-top: 12px;
+                color: #4b5563;
+                font-size: 13px;
+            }
+        </style>
+    </head>
+    <body>
+        <header>
+            <nav>
+                <a href="/" title="Documentation">Documentation</a>
+            </nav>
+        </header>
+        <main class="wrap">
+            <h1>Playground</h1>
+            <p>
+                Fast manual verification for full/micro modes, limits, sorting,
+                and load errors.
+            </p>
+
+            <div class="controls">
+                <div class="control">
+                    <label for="mode">Mode</label>
+                    <select id="mode">
+                        <option value="full">full</option>
+                        <option value="micro">micro</option>
+                    </select>
+                </div>
+                <div class="control">
+                    <label for="limit">Limit</label>
+                    <input id="limit" type="number" min="0" value="8" />
+                </div>
+                <div class="control">
+                    <label for="sort">Sort (full only)</label>
+                    <select id="sort">
+                        <option value="none">none</option>
+                        <option value="title">title</option>
+                        <option value="slug">slug</option>
+                    </select>
+                </div>
+                <div class="control">
+                    <label for="scenario">Load Scenario</label>
+                    <select id="scenario">
+                        <option value="ok">ok</option>
+                        <option value="missing">missing file</option>
+                        <option value="invalid">invalid base URL</option>
+                        <option value="offline">offline-like path</option>
+                        <option value="no-base">no baseUrl</option>
+                        <option value="custom">custom base URL</option>
+                    </select>
+                    <input
+                        type="text"
+                        id="customBaseUrl"
+                        name="customBaseUrl"
+                    />
+                </div>
+            </div>
+
+            <div class="panel">
+                <div class="toolbar">
+                    <button id="reinitBtn" type="button">Re-init widget</button>
+                    <button id="toggleOpenBtn" class="secondary" type="button">
+                        Toggle popover
+                    </button>
+                </div>
+
+                <button id="demosBtn" aria-expanded="false" type="button">
+                    Demos
+                </button>
+                <div id="demosPopover">
+                    <div id="demosContent"></div>
+                </div>
+
+                <div class="meta" id="meta"></div>
+            </div>
+        </main>
+
+        <script type="module">
+            import initFull from "../dist/full.min.js";
+            import initMicro from "../dist/micro.min.js";
+
+            const modeEl = document.getElementById("mode");
+            const limitEl = document.getElementById("limit");
+            const sortEl = document.getElementById("sort");
+            const scenarioEl = document.getElementById("scenario");
+            const reinitBtn = document.getElementById("reinitBtn");
+            const toggleOpenBtn = document.getElementById("toggleOpenBtn");
+            const demosBtn = document.getElementById("demosBtn");
+            const demosPopover = document.getElementById("demosPopover");
+            const demosContent = document.getElementById("demosContent");
+            const meta = document.getElementById("meta");
+            const customBaseUrlEl = document.getElementById("customBaseUrl");
+
+            function readScenarioBase() {
+                const scenario = scenarioEl.value;
+                if (scenario === "ok")
+                    return window.location.origin + "/playground";
+                if (scenario === "missing")
+                    return window.location.origin + "/playground-missing";
+                if (scenario === "offline")
+                    return window.location.origin + "/offline-like";
+                if (scenario === "invalid") return "http://127.0.0.1:1";
+                if (scenario === "custom") return customBaseUrlEl.value;
+                return "";
+            }
+
+            function resetView() {
+                demosContent.textContent = "";
+                demosPopover.removeAttribute("data-open");
+                demosBtn.setAttribute("aria-expanded", "false");
+            }
+
+            function init() {
+                resetView();
+
+                const mode = modeEl.value;
+                const limit = Number(limitEl.value);
+                const sort = sortEl.value;
+                const scenario = scenarioEl.value;
+                const baseUrl = readScenarioBase();
+
+                const opts = {
+                    limit,
+                    sort,
+                    registryPath: "/registry.tsv",
+                    maxAgeMs: 0,
+                    cacheKeyPrefix: `demo-registry-play-${mode}-${scenario}`,
+                };
+
+                meta.textContent = `mode=${mode}, limit=${limit}, sort=${sort}, scenario=${scenario}, baseUrl=${baseUrl || "<empty>"}`;
+
+                if (mode === "full") {
+                    const fullOpts =
+                        scenario === "no-base" ? opts : { ...opts, baseUrl };
+                    initFull(fullOpts);
+                    return;
+                }
+
+                const microOpts =
+                    scenario === "no-base" ? opts : { ...opts, baseUrl };
+                initMicro(microOpts);
+            }
+
+            reinitBtn.addEventListener("click", init);
+            toggleOpenBtn.addEventListener("click", () => demosBtn.click());
+            modeEl.addEventListener("change", init);
+            limitEl.addEventListener("change", init);
+            sortEl.addEventListener("change", init);
+            scenarioEl.addEventListener("change", init);
+
+            init();
+        </script>
+    </body>
+</html>

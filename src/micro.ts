@@ -18,6 +18,7 @@ const BUTTON_ID = __DRW_BUTTON_ID__;
 const POPOVER_ID = __DRW_POPOVER_ID__;
 const CONTENT_ID = __DRW_CONTENT_ID__;
 const DEFAULT_LIMIT = __DRW_LIMIT__;
+const BASE_URL_REQUIRED_MESSAGE = "Configure baseUrl to load demos.";
 
 export function renderMicroLinksHtml(items: DemoItem[], limit: number): string {
   const list = items.slice(0, Math.max(0, limit));
@@ -34,7 +35,7 @@ export function renderMicroLinksHtml(items: DemoItem[], limit: number): string {
   return html;
 }
 
-export default function initMicro(opts: MicroWidgetOptions): void {
+export default function initMicro(opts: MicroWidgetOptions = {}): void {
   const buttonId = opts.buttonId || BUTTON_ID;
   const popoverId = opts.popoverId || POPOVER_ID;
   const contentId = opts.contentId || CONTENT_ID;
@@ -63,6 +64,10 @@ export default function initMicro(opts: MicroWidgetOptions): void {
   async function ensureLoaded() {
     if (loaded) return;
     if (loading) return loading;
+    if (!opts.baseUrl) {
+      content.textContent = BASE_URL_REQUIRED_MESSAGE;
+      return;
+    }
 
     loading = (async () => {
       content.textContent = "Loading…";
