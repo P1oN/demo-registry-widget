@@ -37,7 +37,7 @@ function createMockElement() {
   };
 }
 
-function installDom() {
+function installDom(href = 'https://p1on.github.io/cv/') {
   const button = createMockElement();
   const popover = createMockElement();
   const content = createMockElement();
@@ -56,6 +56,7 @@ function installDom() {
   };
 
   globalThis.window = {
+    location: { href },
     requestIdleCallback(cb) {
       cb();
     },
@@ -156,3 +157,44 @@ test('initMicro works without options and shows baseUrl configuration hint', () 
   assert.equal(popover.classList.contains('drw-popover'), true);
   assert.equal(content.classList.contains('drw-content'), true);
 });
+
+const registryRows = [
+  ['home', 'Portfolio', 'https://p1on.github.io/'],
+  ['cv', 'CV', 'https://p1on.github.io/cv/'],
+  ['todo', 'Todo', 'https://p1on.github.io/todolist/'],
+  ['other', 'Other', 'https://other.example/cv/'],
+];
+async function renderWith(init, href, options = {}, rows = registryRows) {
+  const dom = installDom(href);
+  globalThis.fetch = async () => ({ ok: true, text: async () => rows.map(r => r.join('\t')).join('\n') });
+  init({baseUrl: 'https://p1on.github.io/demo-registry/', ...options});
+  await new Promise(resolve => setImmediate(resolve));
+  return dom;
+}
+for (const [name, init] of [['full', initFull], ['micro', initMicro]]) {
+  test(`${name}: current site is removed before limit; registry input stays intact`, async () => {
+    const {content} = await renderWith(init, 'https://p1on.github.io/?q=1#contact', {limit: 1});
+    assert.ok(content.innerHTML.includes('>CV</a>'));
+    assert.ok(!content.innerHTML.includes('>Portfolio</a>'));
+    assert.equal(registryRows.length, 4);
+  });
+  test(`${name}: nested paths, trailing slashes, origin and segment boundaries`, async () => {
+    for (const url of ['https://p1on.github.io/cv', 'https://p1on.github.io/cv/?x=1#skills', 'https://p1on.github.io/cv/details/']) {
+      const {content} = await renderWith(init, url);
+      assert.ok(!content.innerHTML.includes('>CV</a>'));
+      assert.ok(content.innerHTML.includes('>Portfolio</a>'));
+      assert.ok(content.innerHTML.includes('>Other</a>'));
+    }
+    const {content} = await renderWith(init, 'https://p1on.github.io/cv-other/');
+    assert.ok(content.innerHTML.includes('>CV</a>'));
+  });
+  test(`${name}: opt-out keeps self link; empty selection hides and closes control`, async () => {
+    const {content,button} = await renderWith(init, 'https://p1on.github.io/cv/', {hideCurrentSite:false});
+    assert.ok(content.innerHTML.includes('>CV</a>'));
+    assert.equal(button.hidden,false);
+    const empty = await renderWith(init,'https://p1on.github.io/cv/',{},[registryRows[1]]);
+    assert.equal(empty.button.hidden,true);
+    assert.equal(empty.button.getAttribute('aria-expanded'),'false');
+    assert.equal(empty.popover.getAttribute('data-open'),null);
+  });
+}

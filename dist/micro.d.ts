@@ -5,6 +5,7 @@ type DemoItem = {
     tags: string[];
 };
 type CoreOptions = {
+    hideCurrentSite?: boolean;
     baseUrl?: string;
     cacheKeyPrefix?: string;
     maxAgeMs?: number;

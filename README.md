@@ -150,3 +150,9 @@ npm run test:watch
 GitHub Actions runs build + tests on:
 - every pull request
 - push to `main`
+
+## Current-site filtering (1.2.0)
+
+Both full and micro widgets hide the current site by default (`hideCurrentSite: true`). Matching uses the origin and path: `/cv/` includes its descendants, while `/` only matches the homepage. Queries, fragments and trailing slashes are ignored; `/cv-other/` remains distinct. Filtering happens before sorting and limits and never alters the shared TSV or cache. If no links remain, the Demos button and popover are hidden.
+
+Pass `hideCurrentSite: false` to retain the current site's link. Upgrade the npm dependency or pinned CDN import to `1.2.0` to enable the new default.

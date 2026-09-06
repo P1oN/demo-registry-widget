@@ -1,5 +1,6 @@
 import {
   escapeHtml,
+  visibleDemoItems,
   idle,
   loadRegistryTSV,
   parseRegistryTSV,
@@ -93,7 +94,7 @@ export default function initFull(opts: FullWidgetOptions = {}): void {
   let loading: Promise<void> | null = null;
 
   function render(items: DemoItem[]) {
-    let list = items.slice();
+    let list = visibleDemoItems(items, window.location.href, opts.hideCurrentSite);
 
     const sort = resolveSort(opts.sort);
     if (sort === "title") list.sort(byTitle);
@@ -102,7 +103,9 @@ export default function initFull(opts: FullWidgetOptions = {}): void {
     const limit = typeof opts.limit === "number" ? opts.limit : DEFAULT_LIMIT;
     if (limit > 0) list = list.slice(0, limit);
 
+    btn.hidden = list.length === 0;
     if (!list.length) {
+      close();
       content.innerHTML = '<div class="error">No demos found.</div>';
       return;
     }

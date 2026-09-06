@@ -1,5 +1,6 @@
 import {
   escapeHtml,
+  visibleDemoItems,
   idle,
   loadRegistryTSV,
   sanitizeHttpUrl,
@@ -64,8 +65,11 @@ export default function initMicro(opts: MicroWidgetOptions = {}): void {
   let loading: Promise<void> | null = null;
 
   function render(items: DemoItem[]) {
-    const html = renderMicroLinksHtml(items, limit);
+    const list = visibleDemoItems(items, window.location.href, opts.hideCurrentSite);
+    const html = renderMicroLinksHtml(list, limit);
+    btn.hidden = !html;
     if (!html) {
+      close();
       content.textContent = "No demos.";
       return;
     }

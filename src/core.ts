@@ -6,6 +6,7 @@ export type DemoItem = {
 };
 
 export type CoreOptions = {
+  hideCurrentSite?: boolean; // default: true; filter before sorting/limiting
   baseUrl?: string;
   cacheKeyPrefix?: string; // DEFAULT_CACHE_KEY_PREFIX
   maxAgeMs?: number; // DEFAULT_MAX_AGE: 7 days
@@ -149,4 +150,21 @@ export function idle(fn: () => void): void {
     | ((cb: any) => void);
   if (ric) ric(() => fn());
   else setTimeout(fn, 800);
+}
+
+/** Keep the shared registry/cache intact; select links only for this page. */
+export function visibleDemoItems(items: DemoItem[], currentUrl: string, hideCurrentSite = true): DemoItem[] {
+  let current: URL | undefined;
+  try { current = new URL(currentUrl); } catch { /* Preserve safe links without a browser URL. */ }
+  const path = (url: URL) => url.pathname.replace(/\/+$/, "") || "/";
+  return items.filter(item => {
+    const safe = sanitizeHttpUrl(item.url);
+    if (!safe) return false;
+    if (!hideCurrentSite || !current) return true;
+    const target = new URL(safe);
+    const targetPath = path(target), currentPath = path(current);
+    const matches = target.origin === current.origin &&
+      (targetPath === "/" ? currentPath === "/" : currentPath === targetPath || currentPath.startsWith(targetPath + "/"));
+    return !matches;
+  });
 }
