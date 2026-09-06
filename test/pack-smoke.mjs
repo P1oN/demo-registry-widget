@@ -18,5 +18,6 @@ const files = packed?.[0]?.files?.map((f) => f.path) || [];
 
 assert.ok(files.includes('dist/full.d.ts'), 'dist/full.d.ts should be packed');
 assert.ok(files.includes('dist/micro.d.ts'), 'dist/micro.d.ts should be packed');
+assert.ok(files.includes('dist/default-styles.css'), 'dist/default-styles.css should be packed');
 
 console.log('pack smoke passed');

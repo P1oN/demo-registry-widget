@@ -1,294 +1,325 @@
 <!doctype html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>demo-registry-widget playground</title>
-        <style>
-            :root {
-                --accent-color: #1d4ed8;
-                color-scheme: light;
-                font-family:
-                    ui-sans-serif,
-                    system-ui,
-                    -apple-system,
-                    "Segoe UI",
-                    sans-serif;
-            }
-            body {
-                margin: 0;
-                background: #f8fafc;
-                color: #111827;
-            }
-            header {
-                display: flex;
-                justify-content: center;
-                background: #fff;
-                border-bottom: 1px solid #e5e7eb;
-                nav {
-                    display: flex;
-                    justify-content: space-between;
-                    width: min(100%, 1440px);
-                    padding: 0.5rem;
-                    a {
-                        padding: 1rem;
-                        text-decoration: none;
-                    }
-                }
-            }
-            main {
-                max-width: 960px;
-                margin: 0 auto;
-                padding: 32px 20px 56px;
-            }
-            h1 {
-                margin-top: 0;
-            }
-            a {
-                color: var(--accent-color);
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>demo-registry-widget playground</title>
+    <link rel="stylesheet" href="../dist/default-styles.css" />
+    <style>
+      :root {
+        --pg-font: "Sora", "Avenir Next", "Segoe UI", sans-serif;
+        --pg-bg: #f3f5f8;
+        --pg-card: #ffffff;
+        --pg-border: #e2e8f0;
+        --pg-text: #0f172a;
+        --pg-muted: #64748b;
+        --pg-accent: #0f766e;
+        --pg-accent-soft: rgba(15, 118, 110, 0.12);
+        --pg-radius-lg: 16px;
+        --pg-radius-md: 12px;
+      }
 
-                &:visited {
-                    color: var(--accent-color);
-                }
-            }
-            .controls {
-                display: grid;
-                grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-                gap: 12px;
-                margin-bottom: 18px;
-            }
-            .control {
-                background: #ffffff;
-                border: 1px solid #e5e7eb;
-                border-radius: 10px;
-                padding: 10px;
-                height: fit-content;
-            }
-            .control label {
-                display: block;
-                font-size: 12px;
-                color: #4b5563;
-                margin-bottom: 6px;
-            }
-            .control input,
-            .control select {
-                width: 100%;
-                box-sizing: border-box;
-                padding: 7px;
+      * {
+        box-sizing: border-box;
+      }
 
-                & + input {
-                    display: none;
-                    margin-block-start: 1rem;
-                }
-            }
-            .control select:has(option[value="custom"]:checked) + input {
-                display: block;
-            }
-            .panel {
-                background: #fff;
-                border: 1px solid #e5e7eb;
-                border-radius: 12px;
-                padding: 16px;
-            }
-            .toolbar {
-                display: flex;
-                gap: 8px;
-                margin-bottom: 12px;
-            }
-            button {
-                background: var(--accent-color);
-                color: #fff;
-                border: 0;
-                border-radius: 8px;
-                padding: 8px 12px;
-                cursor: pointer;
-            }
-            button.secondary {
-                background: #6b7280;
-            }
-            #demosPopover {
-                border: 1px solid #d1d5db;
-                border-radius: 8px;
-                padding: 12px;
-                margin-top: 10px;
-                display: none;
-            }
-            #demosPopover[data-open="1"] {
-                display: block;
-            }
-            .error {
-                color: #b91c1c;
-            }
-            .list {
-                margin: 0;
-                padding-left: 20px;
-            }
-            .item + .item {
-                margin-top: 8px;
-            }
-            .row {
-                display: flex;
-                justify-content: space-between;
-                gap: 10px;
-            }
-            .muted {
-                color: #6b7280;
-            }
-            .tags {
-                color: #4b5563;
-                font-size: 12px;
-            }
-            .meta {
-                margin-top: 12px;
-                color: #4b5563;
-                font-size: 13px;
-            }
-        </style>
-    </head>
-    <body>
-        <header>
-            <nav>
-                <a href="/" title="Documentation">Documentation</a>
-            </nav>
-        </header>
-        <main class="wrap">
-            <h1>Playground</h1>
-            <p>
-                Fast manual verification for full/micro modes, limits, sorting,
-                and load errors.
-            </p>
+      body {
+        margin: 0;
+        font-family: var(--pg-font);
+        color: var(--pg-text);
+        background:
+          radial-gradient(circle at 90% -10%, rgba(15, 118, 110, 0.16), transparent 35%),
+          radial-gradient(circle at -10% 0%, rgba(2, 132, 199, 0.14), transparent 28%),
+          var(--pg-bg);
+      }
 
-            <div class="controls">
-                <div class="control">
-                    <label for="mode">Mode</label>
-                    <select id="mode">
-                        <option value="full">full</option>
-                        <option value="micro">micro</option>
-                    </select>
-                </div>
-                <div class="control">
-                    <label for="limit">Limit</label>
-                    <input id="limit" type="number" min="0" value="8" />
-                </div>
-                <div class="control">
-                    <label for="sort">Sort (full only)</label>
-                    <select id="sort">
-                        <option value="none">none</option>
-                        <option value="title">title</option>
-                        <option value="slug">slug</option>
-                    </select>
-                </div>
-                <div class="control">
-                    <label for="scenario">Load Scenario</label>
-                    <select id="scenario">
-                        <option value="ok">ok</option>
-                        <option value="missing">missing file</option>
-                        <option value="invalid">invalid base URL</option>
-                        <option value="offline">offline-like path</option>
-                        <option value="no-base">no baseUrl</option>
-                        <option value="custom">custom base URL</option>
-                    </select>
-                    <input
-                        type="text"
-                        id="customBaseUrl"
-                        name="customBaseUrl"
-                    />
-                </div>
-            </div>
+      header {
+        border-bottom: 1px solid var(--pg-border);
+        background: color-mix(in srgb, #fff 92%, transparent);
+        backdrop-filter: blur(6px);
+      }
 
-            <div class="panel">
-                <div class="toolbar">
-                    <button id="reinitBtn" type="button">Re-init widget</button>
-                    <button id="toggleOpenBtn" class="secondary" type="button">
-                        Toggle popover
-                    </button>
-                </div>
+      nav {
+        max-width: 1060px;
+        margin: 0 auto;
+        padding: 14px 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
 
-                <button id="demosBtn" aria-expanded="false" type="button">
-                    Demos
-                </button>
-                <div id="demosPopover">
-                    <div id="demosContent"></div>
-                </div>
+      .nav-title {
+        font-weight: 700;
+        letter-spacing: 0.02em;
+      }
 
-                <div class="meta" id="meta"></div>
-            </div>
-        </main>
+      nav a {
+        color: var(--pg-accent);
+        text-decoration: none;
+        font-weight: 600;
+      }
 
-        <script type="module">
-            import initFull from "../dist/full.min.js";
-            import initMicro from "../dist/micro.min.js";
+      main {
+        max-width: 1060px;
+        margin: 0 auto;
+        padding: 28px 20px 48px;
+      }
 
-            const modeEl = document.getElementById("mode");
-            const limitEl = document.getElementById("limit");
-            const sortEl = document.getElementById("sort");
-            const scenarioEl = document.getElementById("scenario");
-            const reinitBtn = document.getElementById("reinitBtn");
-            const toggleOpenBtn = document.getElementById("toggleOpenBtn");
-            const demosBtn = document.getElementById("demosBtn");
-            const demosPopover = document.getElementById("demosPopover");
-            const demosContent = document.getElementById("demosContent");
-            const meta = document.getElementById("meta");
-            const customBaseUrlEl = document.getElementById("customBaseUrl");
+      h1 {
+        margin: 0 0 8px;
+        font-size: clamp(1.7rem, 2vw, 2.2rem);
+      }
 
-            function readScenarioBase() {
-                const scenario = scenarioEl.value;
-                if (scenario === "ok")
-                    return window.location.origin + "/playground";
-                if (scenario === "missing")
-                    return window.location.origin + "/playground-missing";
-                if (scenario === "offline")
-                    return window.location.origin + "/offline-like";
-                if (scenario === "invalid") return "http://127.0.0.1:1";
-                if (scenario === "custom") return customBaseUrlEl.value;
-                return "";
-            }
+      .lead {
+        margin: 0 0 18px;
+        color: var(--pg-muted);
+      }
 
-            function resetView() {
-                demosContent.textContent = "";
-                demosPopover.removeAttribute("data-open");
-                demosBtn.setAttribute("aria-expanded", "false");
-            }
+      .grid {
+        display: grid;
+        gap: 14px;
+      }
 
-            function init() {
-                resetView();
+      .controls {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 12px;
+      }
 
-                const mode = modeEl.value;
-                const limit = Number(limitEl.value);
-                const sort = sortEl.value;
-                const scenario = scenarioEl.value;
-                const baseUrl = readScenarioBase();
+      .card {
+        background: var(--pg-card);
+        border: 1px solid var(--pg-border);
+        border-radius: var(--pg-radius-lg);
+        box-shadow: 0 16px 38px rgba(15, 23, 42, 0.06);
+      }
 
-                const opts = {
-                    limit,
-                    sort,
-                    registryPath: "/registry.tsv",
-                    maxAgeMs: 0,
-                    cacheKeyPrefix: `demo-registry-play-${mode}-${scenario}`,
-                };
+      .control {
+        padding: 12px;
+        border-radius: var(--pg-radius-md);
+        border: 1px solid var(--pg-border);
+        background: #fff;
+      }
 
-                meta.textContent = `mode=${mode}, limit=${limit}, sort=${sort}, scenario=${scenario}, baseUrl=${baseUrl || "<empty>"}`;
+      .control label {
+        display: block;
+        margin-bottom: 6px;
+        font-size: 12px;
+        color: var(--pg-muted);
+        font-weight: 600;
+      }
 
-                if (mode === "full") {
-                    const fullOpts =
-                        scenario === "no-base" ? opts : { ...opts, baseUrl };
-                    initFull(fullOpts);
-                    return;
-                }
+      .control input,
+      .control select {
+        width: 100%;
+        border: 1px solid #cbd5e1;
+        border-radius: 10px;
+        padding: 9px 10px;
+        font: inherit;
+        color: var(--pg-text);
+        background: #fff;
+      }
 
-                const microOpts =
-                    scenario === "no-base" ? opts : { ...opts, baseUrl };
-                initMicro(microOpts);
-            }
+      .control input:focus,
+      .control select:focus {
+        outline: none;
+        border-color: var(--pg-accent);
+        box-shadow: 0 0 0 3px var(--pg-accent-soft);
+      }
 
-            reinitBtn.addEventListener("click", init);
-            toggleOpenBtn.addEventListener("click", () => demosBtn.click());
-            modeEl.addEventListener("change", init);
-            limitEl.addEventListener("change", init);
-            sortEl.addEventListener("change", init);
-            scenarioEl.addEventListener("change", init);
+      #customBaseUrl {
+        margin-top: 10px;
+        display: none;
+      }
 
-            init();
-        </script>
-    </body>
+      .panel {
+        padding: 18px;
+      }
+
+      .toolbar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-bottom: 12px;
+      }
+
+      .toolbar button {
+        border: 1px solid transparent;
+        border-radius: 10px;
+        padding: 9px 12px;
+        font: inherit;
+        cursor: pointer;
+      }
+
+      #reinitBtn {
+        background: var(--pg-accent);
+        color: #fff;
+      }
+
+      #toggleOpenBtn {
+        background: #eef2f7;
+        color: #334155;
+        border-color: #d5dde8;
+      }
+
+      .meta {
+        margin-top: 14px;
+        color: var(--pg-muted);
+        font-size: 13px;
+        word-break: break-word;
+      }
+
+      #demosBtn {
+        --drw-accent: var(--pg-accent);
+      }
+
+      @media (max-width: 700px) {
+        main {
+          padding-top: 20px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <nav>
+        <div class="nav-title">demo-registry-widget</div>
+        <a href="/" title="Documentation">Documentation</a>
+      </nav>
+    </header>
+
+    <main>
+      <h1>Playground</h1>
+      <p class="lead">Manual verification for full/micro mode, sorting, limits, and load failures.</p>
+
+      <div class="grid">
+        <section class="controls card">
+          <div class="control">
+            <label for="mode">Mode</label>
+            <select id="mode">
+              <option value="full">full</option>
+              <option value="micro">micro</option>
+            </select>
+          </div>
+
+          <div class="control">
+            <label for="limit">Limit</label>
+            <input id="limit" type="number" min="0" value="8" />
+          </div>
+
+          <div class="control">
+            <label for="sort">Sort (full only)</label>
+            <select id="sort">
+              <option value="none">none</option>
+              <option value="title">title</option>
+              <option value="slug">slug</option>
+            </select>
+          </div>
+
+          <div class="control">
+            <label for="scenario">Load Scenario</label>
+            <select id="scenario">
+              <option value="ok">ok</option>
+              <option value="missing">missing file</option>
+              <option value="invalid">invalid base URL</option>
+              <option value="offline">offline-like path</option>
+              <option value="no-base">no baseUrl</option>
+              <option value="custom">custom base URL</option>
+            </select>
+            <input type="text" id="customBaseUrl" name="customBaseUrl" placeholder="https://example.com" />
+          </div>
+        </section>
+
+        <section class="panel card">
+          <div class="toolbar">
+            <button id="reinitBtn" type="button">Re-init widget</button>
+            <button id="toggleOpenBtn" type="button">Toggle popover</button>
+          </div>
+
+          <button id="demosBtn" aria-expanded="false" type="button">Demos</button>
+          <div id="demosPopover">
+            <div id="demosContent"></div>
+          </div>
+
+          <div class="meta" id="meta"></div>
+        </section>
+      </div>
+    </main>
+
+    <script type="module">
+      import initFull from "../dist/full.min.js";
+      import initMicro from "../dist/micro.min.js";
+
+      const modeEl = document.getElementById("mode");
+      const limitEl = document.getElementById("limit");
+      const sortEl = document.getElementById("sort");
+      const scenarioEl = document.getElementById("scenario");
+      const reinitBtn = document.getElementById("reinitBtn");
+      const toggleOpenBtn = document.getElementById("toggleOpenBtn");
+      const demosBtn = document.getElementById("demosBtn");
+      const demosPopover = document.getElementById("demosPopover");
+      const demosContent = document.getElementById("demosContent");
+      const meta = document.getElementById("meta");
+      const customBaseUrlEl = document.getElementById("customBaseUrl");
+
+      function toggleCustomInput() {
+        customBaseUrlEl.style.display = scenarioEl.value === "custom" ? "block" : "none";
+      }
+
+      function readScenarioBase() {
+        const scenario = scenarioEl.value;
+        if (scenario === "ok") return window.location.origin + "/playground";
+        if (scenario === "missing") return window.location.origin + "/playground-missing";
+        if (scenario === "offline") return window.location.origin + "/offline-like";
+        if (scenario === "invalid") return "http://127.0.0.1:1";
+        if (scenario === "custom") return customBaseUrlEl.value.trim();
+        return "";
+      }
+
+      function resetView() {
+        demosContent.textContent = "";
+        demosPopover.removeAttribute("data-open");
+        demosBtn.setAttribute("aria-expanded", "false");
+      }
+
+      function init() {
+        resetView();
+        toggleCustomInput();
+
+        const mode = modeEl.value;
+        const limit = Number(limitEl.value);
+        const sort = sortEl.value;
+        const scenario = scenarioEl.value;
+        const baseUrl = readScenarioBase();
+
+        const opts = {
+          limit,
+          sort,
+          registryPath: "/registry.tsv",
+          maxAgeMs: 0,
+          cacheKeyPrefix: `demo-registry-play-${mode}-${scenario}`,
+        };
+
+        meta.textContent = `mode=${mode}, limit=${limit}, sort=${sort}, scenario=${scenario}, baseUrl=${baseUrl || "<empty>"}`;
+
+        if (mode === "full") {
+          const fullOpts = scenario === "no-base" ? opts : { ...opts, baseUrl };
+          initFull(fullOpts);
+          return;
+        }
+
+        const microOpts = scenario === "no-base" ? opts : { ...opts, baseUrl };
+        initMicro(microOpts);
+      }
+
+      reinitBtn.addEventListener("click", init);
+      toggleOpenBtn.addEventListener("click", () => demosBtn.click());
+      modeEl.addEventListener("change", init);
+      limitEl.addEventListener("change", init);
+      sortEl.addEventListener("change", init);
+      scenarioEl.addEventListener("change", init);
+      customBaseUrlEl.addEventListener("change", init);
+
+      init();
+    </script>
+  </body>
 </html>

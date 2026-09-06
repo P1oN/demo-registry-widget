@@ -8,10 +8,19 @@ import initFull, {
 import initMicro, { renderMicroLinksHtml } from '../dist/micro.min.js';
 
 function createMockElement() {
+  const classes = new Set();
   return {
     textContent: '',
     innerHTML: '',
     attributes: {},
+    classList: {
+      add(...tokens) {
+        for (const token of tokens) classes.add(String(token));
+      },
+      contains(token) {
+        return classes.has(String(token));
+      },
+    },
     setAttribute(name, value) {
       this.attributes[name] = String(value);
     },
@@ -59,7 +68,7 @@ function installDom() {
     setItem() {},
   };
 
-  return { content };
+  return { button, popover, content };
 }
 
 test('parseRegistryTSV keeps first row when header is absent', () => {
@@ -131,13 +140,19 @@ test('renderMicroLinksHtml escapes text and drops unsafe links', () => {
 });
 
 test('initFull works without options and shows baseUrl configuration hint', () => {
-  const { content } = installDom();
+  const { content, button, popover } = installDom();
   assert.doesNotThrow(() => initFull());
   assert.ok(content.innerHTML.includes('Configure baseUrl to load demos.'));
+  assert.equal(button.classList.contains('drw-button'), true);
+  assert.equal(popover.classList.contains('drw-popover'), true);
+  assert.equal(content.classList.contains('drw-content'), true);
 });
 
 test('initMicro works without options and shows baseUrl configuration hint', () => {
-  const { content } = installDom();
+  const { content, button, popover } = installDom();
   assert.doesNotThrow(() => initMicro());
   assert.equal(content.textContent, 'Configure baseUrl to load demos.');
+  assert.equal(button.classList.contains('drw-button'), true);
+  assert.equal(popover.classList.contains('drw-popover'), true);
+  assert.equal(content.classList.contains('drw-content'), true);
 });

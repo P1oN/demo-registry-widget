@@ -84,6 +84,22 @@ Default IDs:
 
 You can override any of them via options.
 
+## Optional default styles
+
+The package ships an opt-in style preset for the widget container:
+
+```html
+<link rel="stylesheet" href="https://unpkg.com/demo-registry-widget/dist/default-styles.css" />
+```
+
+Or from a bundler:
+
+```ts
+import "demo-registry-widget/styles";
+```
+
+The stylesheet is scoped to runtime classes (`drw-button`, `drw-popover`, `drw-content`) that are applied automatically by `initFull`/`initMicro`.
+
 ## TypeScript
 
 The package ships declaration files for:
@@ -118,6 +134,7 @@ Optional version line is supported:
 ```bash
 npm run build
 npm run build:watch
+npm run styles:watch
 npm run playground
 npm run dev
 npm run typecheck

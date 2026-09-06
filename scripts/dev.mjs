@@ -2,6 +2,7 @@ import { spawn } from 'node:child_process';
 
 const commands = [
   { name: 'build:watch', cmd: ['npm', 'run', 'build:watch'] },
+  { name: 'styles:watch', cmd: ['npm', 'run', 'styles:watch'] },
   { name: 'playground', cmd: ['npm', 'run', 'playground'] },
 ];
 

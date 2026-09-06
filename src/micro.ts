@@ -19,6 +19,14 @@ const POPOVER_ID = __DRW_POPOVER_ID__;
 const CONTENT_ID = __DRW_CONTENT_ID__;
 const DEFAULT_LIMIT = __DRW_LIMIT__;
 const BASE_URL_REQUIRED_MESSAGE = "Configure baseUrl to load demos.";
+const BUTTON_CLASS = "drw-button";
+const POPOVER_CLASS = "drw-popover";
+const CONTENT_CLASS = "drw-content";
+
+function addClass(node: HTMLElement, className: string): void {
+  const classList = (node as { classList?: { add?: (...tokens: string[]) => void } }).classList;
+  if (classList?.add) classList.add(className);
+}
 
 export function renderMicroLinksHtml(items: DemoItem[], limit: number): string {
   const list = items.slice(0, Math.max(0, limit));
@@ -48,6 +56,9 @@ export default function initMicro(opts: MicroWidgetOptions = {}): void {
   const btn = btnNode;
   const pop = popNode;
   const content = contentNode;
+  addClass(btn, BUTTON_CLASS);
+  addClass(pop, POPOVER_CLASS);
+  addClass(content, CONTENT_CLASS);
 
   let loaded = false;
   let loading: Promise<void> | null = null;

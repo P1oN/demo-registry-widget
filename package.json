@@ -29,11 +29,15 @@
     "./micro": {
       "types": "./dist/micro.d.ts",
       "import": "./dist/micro.min.js"
-    }
+    },
+    "./styles": "./dist/default-styles.css"
   },
   "scripts": {
-    "build": "tsup",
+    "build": "npm run build:ts && npm run styles:build",
+    "build:ts": "tsup",
     "build:watch": "tsup --watch",
+    "styles:build": "node scripts/build-styles.mjs",
+    "styles:watch": "node scripts/watch-styles.mjs",
     "playground": "node scripts/serve-static.mjs",
     "dev": "node scripts/dev.mjs",
     "typecheck": "tsc --noEmit -p tsconfig.json",
